@@ -4,8 +4,8 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.CountDownLatch;
 
 import android.app.Activity;
-import android.widget.TextView;
 import android.util.Log;
+import android.widget.TextView;
 
 /**
  * @class AndroidPlatformStrategy
@@ -18,10 +18,10 @@ import android.util.Log;
 public class AndroidPlatformStrategy extends PlatformStrategy
 {	
     /** TextViewVariable. */
-    private TextView mTextViewOutput;
+    private final TextView mTextViewOutput;
 	
     /** Activity variable finds gui widgets by view. */
-    private WeakReference<Activity> mActivity;
+    private final WeakReference<Activity> mActivity;
 
     public AndroidPlatformStrategy(Object output,
                                    final Object activityParam)
@@ -43,39 +43,65 @@ public class AndroidPlatformStrategy extends PlatformStrategy
     private static CountDownLatch mLatch = null;
 
     /** Do any initialization needed to start a new game. */
-    public void begin()
+    @Override
+	public void begin()
     {
         /** (Re)initialize the CountDownLatch. */
         // TODO - You fill in here.
+		mLatch = new CountDownLatch(2);
     }
 
     /** Print the outputString to the display. */
-    public void print(final String outputString)
+    @Override
+	public void print(final String outputString)
     {
         /** 
          * Create a Runnable that's posted to the UI looper thread
          * and appends the outputString to a TextView. 
          */
         // TODO - You fill in here.
+		mActivity.get().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mTextViewOutput.append(outputString + "\n");
+			}
+		});
     }
 
     /** Indicate that a game thread has finished running. */
-    public void done()
+    @Override
+	public void done()
     {	
         // TODO - You fill in here.
+		mActivity.get().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				mLatch.countDown();
+			}
+		});
     }
 
     /** Barrier that waits for all the game threads to finish. */
-    public void awaitDone()
+    @Override
+	public void awaitDone()
     {
         // TODO - You fill in here.
+		try {
+			mLatch.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     /** 
      * Error log formats the message and displays it for the
      * debugging purposes.
      */
-    public void errorLog(String javaFile, String errorMessage) 
+    @Override
+	public void errorLog(String javaFile, String errorMessage) 
     {
        Log.e(javaFile, errorMessage);
     }
