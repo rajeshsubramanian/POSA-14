@@ -76,7 +76,13 @@ public class DownloadActivity extends DownloadBase {
                 // service parameter into an interface that can be
                 // used to make RPC calls to the Service.
 
-                mDownloadCall = null;
+			mDownloadCall = new DownloadCall.Stub() {
+
+				@Override
+				public String downloadImage(Uri uri) throws RemoteException {
+					return DownloadUtils.downloadFile(getBaseContext(), uri);
+				}
+			};
             }
 
             /**
@@ -109,7 +115,15 @@ public class DownloadActivity extends DownloadBase {
                 // service parameter into an interface that can be
                 // used to make RPC calls to the Service.
 
-                mDownloadRequest = null;
+                mDownloadRequest = new DownloadRequest.Stub() {
+					
+					@Override
+					public void downloadImage(Uri uri, DownloadCallback callback)
+							throws RemoteException {
+					// TODO Auto-generated method stub
+
+					}
+				};
             }
 
             /**
